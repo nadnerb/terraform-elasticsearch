@@ -1,9 +1,32 @@
 ### MANDATORY ###
-variable "private_hosted_zone_name" {}
+variable "private_hosted_zone_id" {}
+
+variable "role_tag" {
+  description = "Role of the ec2 instance, defaults to <SERVICE>"
+  default = "SERVICE"
+}
+
+variable "environment_tag" {
+  description = "Role of the ec2 instance, defaults to <DEV>"
+  default = "DEV"
+}
+
+variable "costcenter_tag" {
+  description = "Role of the ec2 instance, defaults to <DEV>"
+  default = "DEV"
+}
 
 # group our resources
 variable "stream_tag" {
   default = "default"
+}
+
+variable "es_environment" {
+  default = "elasticsearch"
+}
+
+variable "es_cluster" {
+  default = "elasticsearch"
 }
 
 ###################################################################
@@ -19,16 +42,25 @@ variable "key_path" {
   description = "Path to the private portion of the SSH key specified."
 }
 
+### MANDATORY ###
+variable "iam_profile" {
+  description = "Elasticsearch IAM profile"
+}
+
 variable "aws_region" {
   description = "AWS region to launch servers."
   default = "ap-southeast-2"
 }
 
-variable "aws_security_group" {
+variable "security_group_name" {
   description = "Name of security group to use in AWS."
   default = "elasticsearch"
 }
 
+### MANDATORY ###
+variable "elb_allowed_cidr_blocks"{
+  description = "elb security group allowed traffic"
+}
 ###################################################################
 # Vpc configuration below
 ###################################################################
@@ -53,12 +85,12 @@ variable "nat_b_id" {
 ###################################################################
 
 ### MANDATORY ###
-variable "aws_subnet_cidr_a" {
+variable "subnet_cidr_a" {
   description = "Subnet A cidr block"
 }
 
 ### MANDATORY ###
-variable "aws_subnet_cidr_b" {
+variable "subnet_cidr_b" {
   description = "Subnet B cidr block"
 }
 

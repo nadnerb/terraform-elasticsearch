@@ -5,3 +5,7 @@ output "private-dns" {
 output "private-ips" {
   value = "${join(",", aws_instance.elastic.*.private_ip)}"
 }
+
+output "ids" {
+  value = "${join(",", aws_instance.elastic.*.id)}"
+}

@@ -18,6 +18,7 @@ We use prebuild Packer AMI's built from these projects:
 
 * install [Terraform](https://www.terraform.io/) and add it to your PATH.
 * clone this repo.
+* `terraform get`
 
 ## Configuration
 

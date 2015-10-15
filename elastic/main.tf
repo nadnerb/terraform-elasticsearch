@@ -1,4 +1,8 @@
 variable "name" {}
+variable "role_tag" {}
+variable "environment_tag" {}
+variable "costcenter_tag" {}
+variable "iam_profile" {}
 variable "region" {}
 variable "instance_type" {}
 variable "ami" {}
@@ -39,11 +43,14 @@ resource "aws_instance" "elastic" {
   }
 
   tags {
-    Name = "elasticsearch_node-${var.name}-${count.index+1}"
+    Name = "${var.name}-${count.index+1}"
+    Stream = "${var.stream_tag}"
+    ServerRole = "${var.role_tag}"
+    CostCenter = "${var.costcenter_tag}"
+    Environment = "${var.environment_tag}"
     # change to use cluster
     es_env = "${var.environment}"
     cluster = "${var.cluster}"
-    stream = "${var.stream_tag}"
     consul = "agent"
   }
 
