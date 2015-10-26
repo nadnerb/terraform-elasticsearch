@@ -45,13 +45,14 @@ resource "aws_instance" "elastic" {
   tags {
     Name = "${var.name}-${count.index+1}"
     Stream = "${var.stream_tag}"
-    ServerRole = "${var.role_tag}"
-    CostCenter = "${var.costcenter_tag}"
-    Environment = "${var.environment_tag}"
     # change to use cluster
     es_env = "${var.environment}"
     cluster = "${var.cluster}"
     consul = "agent"
+    # required for ops reporting
+    ServerRole = "${var.role_tag}"
+    "Cost Center" = "${var.costcenter_tag}"
+    Environment = "${var.environment_tag}"
   }
 
 }

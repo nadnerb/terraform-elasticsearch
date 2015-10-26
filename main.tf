@@ -3,20 +3,6 @@ provider "aws" {
 }
 
 ##############################################################################
-# Route 53
-##############################################################################
-
-/*resource "aws_route53_zone" "search" {*/
-  /*name = "search.${var.private_hosted_zone_name}"*/
-  /*vpc_id = "${var.vpc_id}"*/
-
-  /*tags {*/
-    /*Name = "search internal"*/
-    /*stream = "${var.stream_tag}"*/
-  /*}*/
-/*}*/
-
-##############################################################################
 # Private subnets
 ##############################################################################
 
@@ -196,57 +182,85 @@ resource "aws_security_group" "elasticsearch_elb" {
   }
 }
 
-resource "aws_elb" "elasticsearch" {
-  name = "elasticsearch-elb"
-  security_groups = ["${aws_security_group.elasticsearch_elb.id}"]
-  subnets = ["${aws_subnet.search_a.id}","${aws_subnet.search_b.id}" ]
-  internal = true
-
-  listener {
-    instance_port = 9200
-    instance_protocol = "http"
-    lb_port = 9200
-    lb_protocol = "http"
-  }
-  listener {
-    instance_port = 9300
-    instance_protocol = "http"
-    lb_port = 9300
-    lb_protocol = "http"
-  }
-  health_check {
-    healthy_threshold = 2
-    unhealthy_threshold = 3
-    timeout = 10
-    target = "TCP:9200"
-    interval = 30
-  }
-
-  instances = ["${split(",", module.elastic_nodes_a.ids)}", "${split(",", module.elastic_nodes_b.ids)}"]
-  cross_zone_load_balancing = true
-  idle_timeout = 400
-  connection_draining = true
-  connection_draining_timeout = 400
-  internal = false
+##############################################################################
+# Route 53
+##############################################################################
+resource "aws_route53_zone" "private_zone" {
+  name = "${var.private_hosted_zone_name}"
+  vpc_id = "${var.vpc_id}"
 
   tags {
-    Name = "elasticsearch elb"
+    Name = "Private zone ${var.private_hosted_zone_name}"
     Stream = "${var.stream_tag}"
-    ServerRole = "${var.role_tag} elb"
-    CostCenter = "${var.costcenter_tag}"
+    # required for ops reporting
+    ServerRole = "${var.role_tag} zone"
+    "Cost Center" = "${var.costcenter_tag}"
     Environment = "${var.environment_tag}"
-    Stream = "${var.stream_tag}"
   }
 }
 
 resource "aws_route53_record" "elasticsearch_private" {
-  zone_id = "${var.private_hosted_zone_id}"
-  name = "elasticsearch"
+  zone_id = "${aws_route53_zone.private_zone.id}"
+  name = "${var.private_hosted_zone_name}"
   type = "A"
-
-  alias {
-    name = "${aws_elb.elasticsearch.dns_name}"
-    zone_id = "${aws_elb.elasticsearch.zone_id}"
-    evaluate_target_health = true
-  }
+  ttl = "30"
+  records = ["${split(",", module.elastic_nodes_a.private-ips)}", "${split(",", module.elastic_nodes_b.private-ips)}"]
 }
+
+/*resource "aws_elb" "elasticsearch" {*/
+  /*name = "elasticsearch-elb"*/
+  /*security_groups = ["${aws_security_group.elasticsearch_elb.id}"]*/
+  /*subnets = ["${aws_subnet.search_a.id}","${aws_subnet.search_b.id}" ]*/
+  /*internal = true*/
+
+  /*listener {*/
+    /*instance_port = 9200*/
+    /*instance_protocol = "http"*/
+    /*lb_port = 9200*/
+    /*lb_protocol = "http"*/
+  /*}*/
+
+  /*listener {*/
+    /*instance_port = 9300*/
+    /*instance_protocol = "http"*/
+    /*lb_port = 9300*/
+    /*lb_protocol = "http"*/
+  /*}*/
+
+  /*health_check {*/
+    /*healthy_threshold = 2*/
+    /*unhealthy_threshold = 3*/
+    /*timeout = 5*/
+    /*target = "TCP:9200"*/
+    /*interval = 10*/
+  /*}*/
+
+  /*instances = ["${split(",", module.elastic_nodes_a.ids)}", "${split(",", module.elastic_nodes_b.ids)}"]*/
+  /*cross_zone_load_balancing = true*/
+  /*idle_timeout = 30*/
+  /*connection_draining = true*/
+  /*connection_draining_timeout = 300*/
+  /*internal = true*/
+
+  /*tags {*/
+    /*Name = "elasticsearch elb"*/
+    /*Stream = "${var.stream_tag}"*/
+    /*# required for ops reporting*/
+    /*ServerRole = "${var.role_tag} elb"*/
+    /*"Cost Center" = "${var.costcenter_tag}"*/
+    /*Environment = "${var.environment_tag}"*/
+  /*}*/
+/*}*/
+
+
+/*resource "aws_route53_record" "elasticsearch_private" {*/
+  /*zone_id = "${aws_route53_zone.private_zone.id}"*/
+  /*name = "${var.private_hosted_zone_name}"*/
+  /*type = "A"*/
+
+  /*alias {*/
+    /*name = "${aws_elb.elasticsearch.dns_name}"*/
+    /*zone_id = "${aws_elb.elasticsearch.zone_id}"*/
+    /*evaluate_target_health = true*/
+  /*}*/
+/*}*/

@@ -14,7 +14,7 @@
 
 CONFIG_FILE=".terraform.cfg"
 TFSTATE="terraform.tfstate"
-ENVIRONMENTS=(dc0 dc2)
+ENVIRONMENTS=(dc0 dc2 dc3)
 COMMANDS=(apply destroy plan refresh)
 SYNC_COMMANDS=(apply destroy refresh)
 APP_NAME=terraform-elasticsearch
