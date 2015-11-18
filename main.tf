@@ -110,7 +110,8 @@ resource "aws_security_group" "elastic" {
 module "elastic_nodes_a" {
   source = "./elastic"
 
-  name = "elasticsearch_node-a"
+  name = "a"
+  environment = "${var.environment}"
   iam_profile = "${var.iam_profile}"
   region = "${var.aws_region}"
   ami = "${lookup(var.aws_elasticsearch_amis, var.aws_region)}"
@@ -132,7 +133,8 @@ module "elastic_nodes_a" {
 module "elastic_nodes_b" {
   source = "./elastic"
 
-  name = "elasticsearch_node-b"
+  name = "b"
+  environment = "${var.environment}"
   iam_profile = "${var.iam_profile}"
   region = "${var.aws_region}"
   ami = "${lookup(var.aws_elasticsearch_amis, var.aws_region)}"

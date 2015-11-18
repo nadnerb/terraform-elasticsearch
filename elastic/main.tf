@@ -1,4 +1,5 @@
 variable "name" {}
+variable "environment" {}
 variable "role_tag" {}
 variable "environment_tag" {}
 variable "costcenter_tag" {}
@@ -44,6 +45,7 @@ resource "aws_instance" "elastic" {
 
   tags {
     Name = "${var.name}-${count.index+1}"
+    Name = "elasticsearch_${var.environment}-${var.name}"
     Stream = "${var.stream_tag}"
     # change to use cluster
     es_env = "${var.environment}"

@@ -22,6 +22,10 @@ variable "stream_tag" {
   default = "default"
 }
 
+variable "environment" {
+  default = "default"
+}
+
 variable "es_environment" {
   default = "elasticsearch"
 }
