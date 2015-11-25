@@ -1,6 +1,6 @@
 ### MANDATORY ###
-/*variable "private_hosted_zone_id" {}*/
-variable "private_hosted_zone_name" {}
+variable "private_hosted_zone_id" {}
+/*variable "private_hosted_zone_name" {}*/
 
 variable "role_tag" {
   description = "Role of the ec2 instance, defaults to <SERVICE>"
@@ -143,5 +143,13 @@ variable "subnet_b_num_nodes" {
 # we have consul running as agents on the box
 variable "additional_security_groups" {
   default = ""
+}
+
+variable "volume_name" {
+  default = "/dev/sdh"
+}
+
+variable "volume_size" {
+  default = "10"
 }
 

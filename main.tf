@@ -110,7 +110,7 @@ resource "aws_security_group" "elastic" {
 module "elastic_nodes_a" {
   source = "./elastic"
 
-  name = "a"
+  name = "elasticsearch_${var.environment}-a"
   environment = "${var.environment}"
   iam_profile = "${var.iam_profile}"
   region = "${var.aws_region}"
@@ -119,21 +119,22 @@ module "elastic_nodes_a" {
   instance_type = "${var.instance_type}"
   security_groups = "${concat(aws_security_group.elastic.id, ",", var.additional_security_groups)}"
   key_name = "${var.key_name}"
-  key_path = "${var.key_path}"
   num_nodes = "${var.subnet_a_num_nodes}"
   cluster = "${var.es_cluster}"
-  environment = "${var.es_environment}"
+  es_environment = "${var.es_environment}"
   stream_tag = "${var.stream_tag}"
   role_tag = "elasticsearch"
   costcenter_tag = "${var.costcenter_tag}"
   environment_tag = "${var.environment_tag}"
+  volume_name = "${var.volume_name}"
+  volume_size = "${var.volume_size}"
 }
 
 # elastic instances subnet b
 module "elastic_nodes_b" {
   source = "./elastic"
 
-  name = "b"
+  name = "elasticsearch_${var.environment}-b"
   environment = "${var.environment}"
   iam_profile = "${var.iam_profile}"
   region = "${var.aws_region}"
@@ -142,14 +143,15 @@ module "elastic_nodes_b" {
   instance_type = "${var.instance_type}"
   security_groups = "${concat(aws_security_group.elastic.id, ",", var.additional_security_groups)}"
   key_name = "${var.key_name}"
-  key_path = "${var.key_path}"
   num_nodes = "${var.subnet_b_num_nodes}"
   cluster = "${var.es_cluster}"
-  environment = "${var.es_environment}"
+  es_environment = "${var.es_environment}"
   stream_tag = "${var.stream_tag}"
   role_tag = "elasticsearch"
   costcenter_tag = "${var.costcenter_tag}"
   environment_tag = "${var.environment_tag}"
+  volume_name = "${var.volume_name}"
+  volume_size = "${var.volume_size}"
 }
 
 resource "aws_security_group" "elasticsearch_elb" {
@@ -187,82 +189,12 @@ resource "aws_security_group" "elasticsearch_elb" {
 ##############################################################################
 # Route 53
 ##############################################################################
-resource "aws_route53_zone" "private_zone" {
-  name = "${var.private_hosted_zone_name}"
-  vpc_id = "${var.vpc_id}"
-
-  tags {
-    Name = "Private zone ${var.private_hosted_zone_name}"
-    Stream = "${var.stream_tag}"
-    # required for ops reporting
-    ServerRole = "${var.role_tag} zone"
-    "Cost Center" = "${var.costcenter_tag}"
-    Environment = "${var.environment_tag}"
-  }
-}
 
 resource "aws_route53_record" "elasticsearch_private" {
-  zone_id = "${aws_route53_zone.private_zone.id}"
-  name = "${var.private_hosted_zone_name}"
+  zone_id = "${var.private_hosted_zone_id}"
+  name = "elasticsearch"
   type = "A"
   ttl = "30"
   records = ["${split(",", module.elastic_nodes_a.private-ips)}", "${split(",", module.elastic_nodes_b.private-ips)}"]
 }
 
-/*resource "aws_elb" "elasticsearch" {*/
-  /*name = "elasticsearch-elb"*/
-  /*security_groups = ["${aws_security_group.elasticsearch_elb.id}"]*/
-  /*subnets = ["${aws_subnet.search_a.id}","${aws_subnet.search_b.id}" ]*/
-  /*internal = true*/
-
-  /*listener {*/
-    /*instance_port = 9200*/
-    /*instance_protocol = "http"*/
-    /*lb_port = 9200*/
-    /*lb_protocol = "http"*/
-  /*}*/
-
-  /*listener {*/
-    /*instance_port = 9300*/
-    /*instance_protocol = "http"*/
-    /*lb_port = 9300*/
-    /*lb_protocol = "http"*/
-  /*}*/
-
-  /*health_check {*/
-    /*healthy_threshold = 2*/
-    /*unhealthy_threshold = 3*/
-    /*timeout = 5*/
-    /*target = "TCP:9200"*/
-    /*interval = 10*/
-  /*}*/
-
-  /*instances = ["${split(",", module.elastic_nodes_a.ids)}", "${split(",", module.elastic_nodes_b.ids)}"]*/
-  /*cross_zone_load_balancing = true*/
-  /*idle_timeout = 30*/
-  /*connection_draining = true*/
-  /*connection_draining_timeout = 300*/
-  /*internal = true*/
-
-  /*tags {*/
-    /*Name = "elasticsearch elb"*/
-    /*Stream = "${var.stream_tag}"*/
-    /*# required for ops reporting*/
-    /*ServerRole = "${var.role_tag} elb"*/
-    /*"Cost Center" = "${var.costcenter_tag}"*/
-    /*Environment = "${var.environment_tag}"*/
-  /*}*/
-/*}*/
-
-
-/*resource "aws_route53_record" "elasticsearch_private" {*/
-  /*zone_id = "${aws_route53_zone.private_zone.id}"*/
-  /*name = "${var.private_hosted_zone_name}"*/
-  /*type = "A"*/
-
-  /*alias {*/
-    /*name = "${aws_elb.elasticsearch.dns_name}"*/
-    /*zone_id = "${aws_elb.elasticsearch.zone_id}"*/
-    /*evaluate_target_health = true*/
-  /*}*/
-/*}*/

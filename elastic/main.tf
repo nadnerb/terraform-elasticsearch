@@ -10,11 +10,12 @@ variable "ami" {}
 variable "subnet" {}
 variable "security_groups" {}
 variable "key_name" {}
-variable "key_path" {}
 variable "num_nodes" {}
-variable "environment" {}
+variable "es_environment" {}
 variable "cluster" {}
 variable "stream_tag" {}
+variable "volume_name" {}
+variable "volume_size" {}
 
 resource "aws_instance" "elastic" {
 
@@ -34,27 +35,22 @@ resource "aws_instance" "elastic" {
   # Elasticsearch nodes
   count = "${var.num_nodes}"
 
-  connection {
-    # The default username for our AMI
-    user = "ubuntu"
-    type = "ssh"
-    host = "${self.private_ip}"
-    # The path to your keyfile
-    key_file = "${var.key_path}"
-  }
-
   tags {
     Name = "${var.name}-${count.index+1}"
-    Name = "elasticsearch_${var.environment}-${var.name}"
-    Stream = "${var.stream_tag}"
+    consul = "agent-${var.environment}"
     # change to use cluster
-    es_env = "${var.environment}"
+    es_env = "${var.es_environment}"
     cluster = "${var.cluster}"
-    consul = "agent"
     # required for ops reporting
+    Stream = "${var.stream_tag}"
     ServerRole = "${var.role_tag}"
     "Cost Center" = "${var.costcenter_tag}"
     Environment = "${var.environment_tag}"
+  }
+
+  ebs_block_device {
+    device_name = "${var.volume_name}"
+    volume_size = "${var.volume_size}"
   }
 
 }
