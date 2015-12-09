@@ -14,8 +14,9 @@ variable "num_nodes" {}
 variable "es_environment" {}
 variable "cluster" {}
 variable "stream_tag" {}
-variable "volume_name" {}
-variable "volume_size" {}
+variable "volume_name" { default = "/dev/sdh" }
+variable "volume_size" { default = "10" }
+
 
 resource "aws_instance" "elastic" {
 

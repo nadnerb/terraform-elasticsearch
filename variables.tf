@@ -57,15 +57,16 @@ variable "aws_region" {
   default = "ap-southeast-2"
 }
 
+variable "availability_zones" {
+  description = "AWS region to launch servers."
+  default = "ap-southeast-2a,ap-southeast-2b"
+}
+
 variable "security_group_name" {
   description = "Name of security group to use in AWS."
   default = "elasticsearch"
 }
 
-### MANDATORY ###
-variable "elb_allowed_cidr_blocks"{
-  description = "elb security group allowed traffic"
-}
 ###################################################################
 # Vpc configuration below
 ###################################################################
@@ -75,40 +76,51 @@ variable "vpc_id" {
   description = "VPC id"
 }
 
-### MANDATORY ###
-variable "nat_a_id" {
-  description = "nat a id for subnet routes"
+variable "external_cidr_blocks"{
+  default = "0.0.0.0/0"
 }
 
 ### MANDATORY ###
-variable "nat_b_id" {
-  description = "nat b id for subnet routes"
-}
+# DEPRECATED
+/*variable "nat_a_id" {*/
+  /*description = "nat a id for subnet routes"*/
+/*}*/
+
+### MANDATORY ###
+# DEPRECATED
+/*variable "nat_b_id" {*/
+  /*description = "nat b id for subnet routes"*/
+/*}*/
 
 ###################################################################
 # Subnet configuration below
 ###################################################################
 
 ### MANDATORY ###
-variable "subnet_cidr_a" {
-  description = "Subnet A cidr block"
-}
+# DEPRECATED
+/*variable "subnet_cidr_a" {*/
+  /*description = "Subnet A cidr block"*/
+/*}*/
 
 ### MANDATORY ###
-variable "subnet_cidr_b" {
-  description = "Subnet B cidr block"
+# DEPRECATED
+/*variable "subnet_cidr_b" {*/
+  /*description = "Subnet B cidr block"*/
+/*}*/
+
+### MANDATORY ###
+variable "subnets" {
+  description = "subnets to deploy into"
 }
 
 ###################################################################
 # Elasticsearch configuration below
 ###################################################################
 
-# Ubuntu Precise 14.04 LTS (x64) built by packer
+### MANDATORY ###
+# Amazon Linux built by packer
 # See https://github.com/nadnerb/packer-elastic-search
-variable "aws_elasticsearch_amis" {
-  default = {
-    ap-southeast-2 = "ami-7ff38945"
-  }
+variable "ami" {
 }
 
 variable "instance_type" {
@@ -127,12 +139,20 @@ variable "es_environment" {
   description = "Elastic environment tag for auto discovery"
 }
 
+# total number of nodes
+variable "instances" {
+  description = "total instances"
+  default = "2"
+}
+
+#DEPRECATED
 # number of nodes in zone a
 variable "subnet_a_num_nodes" {
   description = "Elastic nodes in a"
   default = "1"
 }
 
+#DEPRECATED
 # number of nodes in zone b
 variable "subnet_b_num_nodes" {
   description = "Elastic nodes in b"
@@ -153,3 +173,24 @@ variable "volume_size" {
   default = "10"
 }
 
+variable "elasticsearch_data" {
+  default = "/opt/elasticearch/data"
+}
+
+###################################################################
+# Consul configuration below
+###################################################################
+
+variable "dns_server" {
+}
+
+variable "consul_dc" {
+  default = "dev"
+}
+
+variable "atlas" {
+  default = "example/atlas"
+}
+
+variable "atlas_token" {
+}

@@ -3,74 +3,10 @@ provider "aws" {
 }
 
 ##############################################################################
-# Private subnets
-##############################################################################
-
-resource "aws_route_table" "search_a" {
-  vpc_id = "${var.vpc_id}"
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    instance_id = "${var.nat_a_id}"
-  }
-
-  tags {
-    Name = "search private route table a"
-    stream = "${var.stream_tag}"
-  }
-}
-
-resource "aws_route_table" "search_b" {
-  vpc_id = "${var.vpc_id}"
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    instance_id = "${var.nat_b_id}"
-  }
-
-  tags {
-    Name = "search private route table b"
-    stream = "${var.stream_tag}"
-  }
-}
-
-resource "aws_subnet" "search_a" {
-  vpc_id = "${var.vpc_id}"
-  availability_zone = "${concat(var.aws_region, "a")}"
-  cidr_block = "${var.subnet_cidr_a}"
-
-  tags {
-    Name = "SearchPrivateA"
-    stream = "${var.stream_tag}"
-  }
-}
-
-resource "aws_subnet" "search_b" {
-  vpc_id = "${var.vpc_id}"
-  availability_zone = "${concat(var.aws_region, "b")}"
-  cidr_block = "${var.subnet_cidr_b}"
-
-  tags {
-    Name = "SearchPrivateB"
-    stream = "${var.stream_tag}"
-  }
-}
-
-resource "aws_route_table_association" "search_a" {
-  subnet_id = "${aws_subnet.search_a.id}"
-  route_table_id = "${aws_route_table.search_a.id}"
-}
-
-resource "aws_route_table_association" "search_b" {
-  subnet_id = "${aws_subnet.search_b.id}"
-  route_table_id = "${aws_route_table.search_b.id}"
-}
-
-##############################################################################
 # Elasticsearch
 ##############################################################################
 
-resource "aws_security_group" "elastic" {
+resource "aws_security_group" "elasticsearch" {
   name = "${var.security_group_name}"
   description = "Elasticsearch ports with ssh"
   vpc_id = "${var.vpc_id}"
@@ -100,101 +36,102 @@ resource "aws_security_group" "elastic" {
   }
 
   tags {
-    Name = "elasticsearch security group"
+    Name = "${var.es_cluster} security group"
     stream = "${var.stream_tag}"
     cluster = "${var.es_cluster}"
   }
 }
 
-# elastic instances subnet a
-module "elastic_nodes_a" {
-  source = "./elastic"
+resource "template_file" "user_data" {
+  filename = "${path.module}/templates/user-data.tpl"
 
-  name = "elasticsearch_${var.environment}-a"
-  environment = "${var.environment}"
-  iam_profile = "${var.iam_profile}"
-  region = "${var.aws_region}"
-  ami = "${lookup(var.aws_elasticsearch_amis, var.aws_region)}"
-  subnet = "${aws_subnet.search_a.id}"
+  vars {
+    dns_server              = "${var.dns_server}"
+    num_nodes               = "${var.instances}"
+    consul_dc               = "${var.consul_dc}"
+    atlas                   = "${var.atlas}"
+    atlas_token             = "${var.atlas_token}"
+    volume_name             = "${var.volume_name}"
+    elasticsearch_data_dir  = "${var.elasticsearch_data}"
+    es_cluster  = "${var.es_cluster}"
+    es_environment  = "${var.es_environment}"
+    /*security_groups = "${concat(aws_security_group.elasticsearch.id, ",", var.additional_security_groups)}"*/
+    security_groups = "${aws_security_group.elasticsearch.id}"
+    aws_region  = "${var.aws_region}"
+    availability_zones = "${var.availability_zones}"
+  }
+}
+
+resource "aws_launch_configuration" "elasticsearch" {
+  image_id = "${var.ami}"
   instance_type = "${var.instance_type}"
-  security_groups = "${concat(aws_security_group.elastic.id, ",", var.additional_security_groups)}"
+  security_groups = ["${split(",", replace(concat(aws_security_group.elasticsearch.id, ",", var.additional_security_groups), "/,\s?$/", ""))}"]
+  associate_public_ip_address = false
+  ebs_optimized = false
   key_name = "${var.key_name}"
-  num_nodes = "${var.subnet_a_num_nodes}"
-  cluster = "${var.es_cluster}"
-  es_environment = "${var.es_environment}"
-  stream_tag = "${var.stream_tag}"
-  role_tag = "elasticsearch"
-  costcenter_tag = "${var.costcenter_tag}"
-  environment_tag = "${var.environment_tag}"
-  volume_name = "${var.volume_name}"
-  volume_size = "${var.volume_size}"
-}
+  /*iam_instance_profile = "${aws_iam_instance_profile.elasticsearch.id}"*/
+# FIXME
+  iam_instance_profile = "elasticSearchNode"
+  user_data = "${template_file.user_data.rendered}"
 
-# elastic instances subnet b
-module "elastic_nodes_b" {
-  source = "./elastic"
-
-  name = "elasticsearch_${var.environment}-b"
-  environment = "${var.environment}"
-  iam_profile = "${var.iam_profile}"
-  region = "${var.aws_region}"
-  ami = "${lookup(var.aws_elasticsearch_amis, var.aws_region)}"
-  subnet = "${aws_subnet.search_b.id}"
-  instance_type = "${var.instance_type}"
-  security_groups = "${concat(aws_security_group.elastic.id, ",", var.additional_security_groups)}"
-  key_name = "${var.key_name}"
-  num_nodes = "${var.subnet_b_num_nodes}"
-  cluster = "${var.es_cluster}"
-  es_environment = "${var.es_environment}"
-  stream_tag = "${var.stream_tag}"
-  role_tag = "elasticsearch"
-  costcenter_tag = "${var.costcenter_tag}"
-  environment_tag = "${var.environment_tag}"
-  volume_name = "${var.volume_name}"
-  volume_size = "${var.volume_size}"
-}
-
-resource "aws_security_group" "elasticsearch_elb" {
-  name = "elasticsearch elb"
-  description = "Elasticsearch ports"
-  vpc_id = "${var.vpc_id}"
-
-  ingress {
-    from_port = 80
-    to_port = 80
-    protocol = "tcp"
-    cidr_blocks = ["${var.elb_allowed_cidr_blocks}"]
+  lifecycle {
+    create_before_destroy = true
   }
 
-  ingress {
-    from_port = 443
-    to_port = 443
-    protocol = "tcp"
-    cidr_blocks = ["${var.elb_allowed_cidr_blocks}"]
-  }
-
-  egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags {
-    Name = "consul elb security group"
-    stream = "${var.stream_tag}"
+  ebs_block_device {
+    device_name = "${var.volume_name}"
+    volume_size = "${var.volume_size}"
   }
 }
+resource "aws_autoscaling_group" "elasticsearch" {
+  availability_zones = ["${split(",", var.availability_zones)}"]
+  vpc_zone_identifier = ["${split(",", var.subnets)}"]
+  name = "elasticsearch-asg-${var.es_cluster}"
+  max_size = "${var.instances}"
+  min_size = "${var.instances}"
+  desired_capacity = "${var.instances}"
+  default_cooldown = 30
+  force_delete = true
+  launch_configuration = "${aws_launch_configuration.elasticsearch.id}"
 
-##############################################################################
-# Route 53
-##############################################################################
-
-resource "aws_route53_record" "elasticsearch_private" {
-  zone_id = "${var.private_hosted_zone_id}"
-  name = "elasticsearch"
-  type = "A"
-  ttl = "30"
-  records = ["${split(",", module.elastic_nodes_a.private-ips)}", "${split(",", module.elastic_nodes_b.private-ips)}"]
+  tag {
+    key = "Name"
+    value = "${format("%s-elasticsearch", var.es_cluster)}"
+    propagate_at_launch = true
+  }
+  tag {
+    key = "Stream"
+    value = "${var.stream_tag}"
+    propagate_at_launch = true
+  }
+  tag {
+    key = "ServerRole"
+    value = "Elasticsearch"
+    propagate_at_launch = true
+  }
+  tag {
+    key = "Cost Center"
+    value = "${var.costcenter_tag}"
+    propagate_at_launch = true
+  }
+  tag {
+    key = "Environment"
+    value = "${var.environment_tag}"
+    propagate_at_launch = true
+  }
+  tag {
+    key = "consul"
+    value = "agent"
+    propagate_at_launch = true
+  }
+  tag {
+    key = "es_env"
+    value = "${var.es_environment}"
+    propagate_at_launch = true
+  }
+  /*load_balancers = ["${aws_elb.elasticsearch_elb.name}"]*/
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
