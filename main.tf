@@ -7,7 +7,7 @@ provider "aws" {
 ##############################################################################
 
 resource "aws_security_group" "elasticsearch" {
-  name = "${var.security_group_name}"
+  name = "${var.security_group_name}-elasticsearch"
   description = "Elasticsearch ports with ssh"
   vpc_id = "${var.vpc_id}"
 
@@ -36,14 +36,14 @@ resource "aws_security_group" "elasticsearch" {
   }
 
   tags {
-    Name = "${var.es_cluster} security group"
+    Name = "${var.es_cluster}-elasticsearch"
     stream = "${var.stream_tag}"
     cluster = "${var.es_cluster}"
   }
 }
 
 resource "template_file" "user_data" {
-  filename = "${path.module}/templates/user-data.tpl"
+  template = "${path.module}/templates/user-data.tpl"
 
   vars {
     dns_server              = "${var.dns_server}"
@@ -65,12 +65,12 @@ resource "template_file" "user_data" {
 resource "aws_launch_configuration" "elasticsearch" {
   image_id = "${var.ami}"
   instance_type = "${var.instance_type}"
-  security_groups = ["${split(",", replace(concat(aws_security_group.elasticsearch.id, ",", var.additional_security_groups), "/,\s?$/", ""))}"]
+  security_groups = ["${split(",", replace(concat(aws_security_group.elasticsearch.id, ",", var.additional_security_groups), "/,\\s?$/", ""))}"]
   associate_public_ip_address = false
   ebs_optimized = false
   key_name = "${var.key_name}"
-  /*iam_instance_profile = "${aws_iam_instance_profile.elasticsearch.id}"*/
 # FIXME
+  #iam_instance_profile = "${aws_iam_instance_profile.elasticsearch.id}"
   iam_instance_profile = "elasticSearchNode"
   user_data = "${template_file.user_data.rendered}"
 
@@ -83,6 +83,7 @@ resource "aws_launch_configuration" "elasticsearch" {
     volume_size = "${var.volume_size}"
   }
 }
+
 resource "aws_autoscaling_group" "elasticsearch" {
   availability_zones = ["${split(",", var.availability_zones)}"]
   vpc_zone_identifier = ["${split(",", var.subnets)}"]
