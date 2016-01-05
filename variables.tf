@@ -43,11 +43,6 @@ variable "key_name" {
 }
 
 ### MANDATORY ###
-variable "key_path" {
-  description = "Path to the private portion of the SSH key specified."
-}
-
-### MANDATORY ###
 variable "iam_profile" {
   description = "Elasticsearch IAM profile"
 }
@@ -76,37 +71,9 @@ variable "vpc_id" {
   description = "VPC id"
 }
 
-variable "external_cidr_blocks"{
-  default = "0.0.0.0/0"
-}
-
-### MANDATORY ###
-# DEPRECATED
-/*variable "nat_a_id" {*/
-  /*description = "nat a id for subnet routes"*/
-/*}*/
-
-### MANDATORY ###
-# DEPRECATED
-/*variable "nat_b_id" {*/
-  /*description = "nat b id for subnet routes"*/
-/*}*/
-
 ###################################################################
 # Subnet configuration below
 ###################################################################
-
-### MANDATORY ###
-# DEPRECATED
-/*variable "subnet_cidr_a" {*/
-  /*description = "Subnet A cidr block"*/
-/*}*/
-
-### MANDATORY ###
-# DEPRECATED
-/*variable "subnet_cidr_b" {*/
-  /*description = "Subnet B cidr block"*/
-/*}*/
 
 ### MANDATORY ###
 variable "subnets" {
