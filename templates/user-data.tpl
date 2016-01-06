@@ -84,6 +84,7 @@ cat <<'EOF' >/tmp/elasticsearch-consul.json
         "tags": [
             "http", "index"
         ],
+        "port": 9200,
         "checks": [{
             "id": "1",
             "name": "Elasticsearch HTTP",
