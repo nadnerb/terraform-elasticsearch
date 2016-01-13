@@ -22,46 +22,47 @@ We use prebuild Packer AMI's built from these projects:
 
 ## Configuration
 
+### AWS Credentials
+
+We rely on AWS credentials to have been set elsewhere, for example using environment variables. We also use [terraform_exec](https://github.com/nadnerb/terraform_exec) to execute terraform that
+saves environment state to S3.
+
+### Terraform configuration
+
 Create a configuration file such as `~/.aws/default.tfvars` which can include mandatory and optional variables such as:
 
 ```
-aws_access_key="<your aws access key>"
-aws_secret_key="<your aws access secret>"
-key_name="<your private key name>"
 key_name="<key name>"
 
 stream_tag="<used for aws resource groups>"
 
 aws_region="ap-southeast-2"
-aws_elasticsearch_amis.ap-southeast-2="ami-7ff38945"
+ami="ami-7ff38945"
 
+vpc_id="xxx"
+additional_security_groups=""
+
+es_cluster="cluster name"
+es_environment="dev"
+volume_name="/dev/sdh"
+volume_size="10"
+
+instances="3"
+availability_zones="ap-southeast-2a,ap-southeast-2b"
+subnets="subnet-xxxxx,subnet-yyyyy"
+
+# consul variables
+dns_server  = "172.100.0.2"
+consul_dc   = "dc0"
+atlas       = "atlas user"
+atlas_token = "atlas token"
 # internal hosted zone
-hosted_zone_name="<some.internal>"
-
-aws_subnet_cidr_a="<subnet a cidr>"
-aws_subnet_public_cidr_a="<subnet a public cidr>"
-aws_subnet_cidr_b="<subnet b cidr>"
-aws_subnet_public_cidr_b="<subnet b public cidr>"
-
-# required by ansible
-es_cluster="<elasticsearch cluster name>"
-es_environment="<elasticsearch environment>"
-```
-
-You can also modify the `variables.tf` file, replacing correct values for `aws_amis` for your region:
-
-```
-variable "aws_elasticsearch_amis" {
-  default = {
-		ap-southeast-2 = "ami-xxxxxxx"
-  }
-}
 ```
 
 These variables can also be overriden when running terraform like so:
 
 ```
-terraform (plan|apply|destroy) -var 'aws_elasticsearch_amis.ap-southeast-2=foozie'
+terraform (plan|apply|destroy) -var 'ami=foozie'
 ```
 
 The variables.tf terraform file can be further modified, for example it defaults to `ap-southeast-2` for the AWS region.
@@ -91,5 +92,5 @@ terraform plan -var-file '~/.aws/default.tfvars' -var 'additional_security_group
 ## TODO
 
 * Update this readme
-* Use consul template for configuration
+* Create IAM role
 

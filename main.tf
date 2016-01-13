@@ -40,6 +40,10 @@ resource "aws_security_group" "elasticsearch" {
     stream = "${var.stream_tag}"
     cluster = "${var.es_cluster}"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "template_file" "user_data" {
