@@ -59,7 +59,6 @@ resource "template_file" "user_data" {
     elasticsearch_data_dir  = "${var.elasticsearch_data}"
     es_cluster  = "${var.es_cluster}"
     es_environment  = "${var.es_environment}"
-    /*security_groups = "${concat(aws_security_group.elasticsearch.id, ",", var.additional_security_groups)}"*/
     security_groups = "${aws_security_group.elasticsearch.id}"
     aws_region  = "${var.aws_region}"
     availability_zones = "${var.availability_zones}"
@@ -134,7 +133,7 @@ resource "aws_autoscaling_group" "elasticsearch" {
     value = "${var.es_environment}"
     propagate_at_launch = true
   }
-  /*load_balancers = ["${aws_elb.elasticsearch_elb.name}"]*/
+
   lifecycle {
     create_before_destroy = true
   }

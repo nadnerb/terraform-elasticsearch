@@ -1,7 +1,4 @@
 ### MANDATORY ###
-variable "private_hosted_zone_id" {}
-/*variable "private_hosted_zone_name" {}*/
-
 variable "role_tag" {
   description = "Role of the ec2 instance, defaults to <SERVICE>"
   default = "SERVICE"
