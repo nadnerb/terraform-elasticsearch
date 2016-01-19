@@ -63,6 +63,10 @@ resource "template_file" "user_data" {
     aws_region  = "${var.aws_region}"
     availability_zones = "${var.availability_zones}"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_launch_configuration" "elasticsearch" {
