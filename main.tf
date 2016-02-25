@@ -16,7 +16,7 @@ resource "aws_security_group" "elasticsearch" {
     from_port = 22
     to_port = 22
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${split(",", var.internal_cidr_blocks)}"]
   }
 
   # elastic ports from anywhere.. we are using private ips so shouldn't
@@ -25,7 +25,7 @@ resource "aws_security_group" "elasticsearch" {
     from_port = 9200
     to_port = 9400
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${split(",", var.internal_cidr_blocks)}"]
   }
 
   egress {
@@ -76,7 +76,7 @@ resource "aws_launch_configuration" "elasticsearch" {
   associate_public_ip_address = false
   ebs_optimized = false
   key_name = "${var.key_name}"
-# FIXME
+# FIXME or not? makes it a pain with multiple clusters in an account, seperate iam main.tf instead?
   #iam_instance_profile = "${aws_iam_instance_profile.elasticsearch.id}"
   iam_instance_profile = "elasticSearchNode"
   user_data = "${template_file.user_data.rendered}"
@@ -88,13 +88,13 @@ resource "aws_launch_configuration" "elasticsearch" {
   ebs_block_device {
     device_name = "${var.volume_name}"
     volume_size = "${var.volume_size}"
+    encrypted = "${var.volume_encryption}"
   }
 }
 
 resource "aws_autoscaling_group" "elasticsearch" {
   availability_zones = ["${split(",", var.availability_zones)}"]
   vpc_zone_identifier = ["${split(",", var.subnets)}"]
-  name = "elasticsearch-asg-${var.es_cluster}"
   max_size = "${var.instances}"
   min_size = "${var.instances}"
   desired_capacity = "${var.instances}"

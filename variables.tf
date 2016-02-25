@@ -68,6 +68,10 @@ variable "vpc_id" {
   description = "VPC id"
 }
 
+variable "internal_cidr_blocks"{
+  default = "0.0.0.0/0"
+}
+
 ###################################################################
 # Subnet configuration below
 ###################################################################
@@ -135,6 +139,10 @@ variable "volume_name" {
 
 variable "volume_size" {
   default = "10"
+}
+
+variable "volume_encryption" {
+  default = true
 }
 
 variable "elasticsearch_data" {
