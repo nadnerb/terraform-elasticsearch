@@ -146,7 +146,7 @@ variable "volume_encryption" {
 }
 
 variable "elasticsearch_data" {
-  default = "/opt/elasticearch/data"
+  default = "/opt/elasticsearch/data"
 }
 
 ###################################################################
