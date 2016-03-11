@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+# Ideally move all this to a proper config management tool
+#
 # Configure elasticsearch
 cat <<'EOF' >/tmp/elasticsearch_vars
 export CLUSTER_NAME="${es_cluster}"
@@ -10,6 +12,7 @@ export ES_ENV="${es_environment}"
 export AVAILABILITY_ZONES="${availability_zones}"
 export AWS_REGION="${aws_region}"
 EOF
+
 sudo mv /tmp/elasticsearch_vars /etc/elasticsearch/configurable/elasticsearch_vars
 # the following have been installed via packer
 sudo cp /etc/elasticsearch/configurable/elasticsearch /etc/init.d/
@@ -75,7 +78,6 @@ EOF
 sudo mv /tmp/upstart /etc/init/consul.conf
 
 # Setup the consul agent config
-# This uses the check.py script uploaded by packer
 cat <<'EOF' >/tmp/elasticsearch-consul.json
 {
     "service": {
@@ -89,7 +91,7 @@ cat <<'EOF' >/tmp/elasticsearch-consul.json
             "id": "1",
             "name": "Elasticsearch HTTP",
             "notes": "Use curl to check the web service every 10 seconds",
-            "script": "curl localhost:9200 >/dev/null 2>&1",
+            "script": "curl `ifconfig eth0 | grep 'inet addr' | awk '{ print substr($2,6) }'`:9200 >/dev/null 2>&1",
             "interval": "10s"
         }, {
             "id": "2",
@@ -102,6 +104,34 @@ cat <<'EOF' >/tmp/elasticsearch-consul.json
 }
 EOF
 sudo mv /tmp/elasticsearch-consul.json /etc/consul.d/elasticsearch.json
+
+cat <<EOF >/tmp/check.py
+import requests
+import sys
+import socket
+ip = socket.gethostbyname(socket.gethostname())
+
+url = "http://{ip}:9200/_cat/health".format(**locals())
+
+def green():
+    sys.exit()
+
+def yellow():
+    sys.exit(1)
+
+def red():
+    sys.exit(2)
+
+codes = {
+        "green": green,
+        "yellow": yellow,
+        "red": red,
+    }
+
+r = requests.get(url)
+codes.get(r.text.split()[3], lambda: red)()
+EOF
+sudo mv /tmp/check.py /etc/consul.d/check.py
 
 # Start Elasticsearch
 sudo chkconfig --add elasticsearch
