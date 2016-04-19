@@ -4,6 +4,7 @@ set -e
 # Ideally move all this to a proper config management tool
 #
 # Configure elasticsearch
+
 cat <<'EOF' >/tmp/elasticsearch_vars
 export CLUSTER_NAME="${es_cluster}"
 export DATA_DIR="${elasticsearch_data_dir}"
@@ -13,11 +14,17 @@ export AVAILABILITY_ZONES="${availability_zones}"
 export AWS_REGION="${aws_region}"
 EOF
 
+##############################################
+# The following have been installed via Packer
+##############################################
+
 sudo mv /tmp/elasticsearch_vars /etc/elasticsearch/configurable/elasticsearch_vars
-# the following have been installed via packer
 sudo cp /etc/elasticsearch/configurable/elasticsearch /etc/init.d/
 sudo chmod u+x /etc/init.d/elasticsearch
 sudo cp /etc/elasticsearch/configurable/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
+
+# heap size
+sudo sed -i "s/#ES_HEAP_SIZE=2g/ES_HEAP_SIZE=${heap_size}/" /etc/sysconfig/elasticsearch
 
 sudo mkfs -t ext4 ${volume_name}
 sudo mkdir -p ${elasticsearch_data_dir}

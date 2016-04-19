@@ -57,6 +57,7 @@ resource "template_file" "user_data" {
     atlas_token             = "${var.atlas_token}"
     volume_name             = "${var.volume_name}"
     elasticsearch_data_dir  = "${var.elasticsearch_data}"
+    heap_size               = "${var.heap_size}"
     es_cluster  = "${var.es_cluster}"
     es_environment  = "${var.es_environment}"
     security_groups = "${aws_security_group.elasticsearch.id}"

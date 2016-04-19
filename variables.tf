@@ -149,6 +149,11 @@ variable "elasticsearch_data" {
   default = "/opt/elasticsearch/data"
 }
 
+# default elasticsearch heap size
+variable "heap_size" {
+  default = "256m"
+}
+
 ###################################################################
 # Consul configuration below
 ###################################################################
