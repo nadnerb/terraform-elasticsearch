@@ -5,7 +5,7 @@ This project will create an elasticsearch cluster in AWS using multiple availabi
 
 ## Requirements
 
-* Terraform >= v0.6.8
+* Terraform >= v0.6.15
 * Elasticsearch IAM profile called elasticSearchNode with [EC2 permissions](https://github.com/elastic/elasticsearch-cloud-aws#recommended-ec2-permissions)
 
 Packer AMI's

@@ -47,7 +47,7 @@ resource "aws_security_group" "elasticsearch" {
 }
 
 resource "template_file" "user_data" {
-  template = "${path.module}/templates/user-data.tpl"
+  template = "${file("${path.root}/templates/user-data.tpl")}"
 
   vars {
     dns_server              = "${var.dns_server}"
