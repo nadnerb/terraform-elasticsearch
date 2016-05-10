@@ -51,7 +51,6 @@ resource "template_file" "user_data" {
 
   vars {
     dns_server              = "${var.dns_server}"
-    num_nodes               = "${var.instances}"
     consul_dc               = "${var.consul_dc}"
     atlas                   = "${var.atlas}"
     atlas_token             = "${var.atlas_token}"

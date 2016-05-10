@@ -5,26 +5,29 @@ set -e
 #
 # Configure elasticsearch
 
-cat <<'EOF' >/tmp/elasticsearch_vars
-export CLUSTER_NAME="${es_cluster}"
-export DATA_DIR="${elasticsearch_data_dir}"
-export SECURITY_GROUPS="${security_groups}"
-export ES_ENV="${es_environment}"
-export AVAILABILITY_ZONES="${availability_zones}"
-export AWS_REGION="${aws_region}"
+cat <<'EOF' >/etc/elasticsearch/elasticsearch.yml
+cluster.name: ${es_cluster}
+
+# our init.d script sets the default to this as well
+path.data: ${elasticsearch_data_dir}
+
+bootstrap.mlockall: true
+network.host: _ec2:privateIpv4_
+discovery.type: ec2
+discovery.ec2.groups: ${security_groups}
+discovery.ec2.tag.es_env: ${es_environment}
+cloud.aws.region: ${aws_region}
+discovery.ec2.availability_zones: ${availability_zones}
+script.inline: true
 EOF
 
 ##############################################
 # The following have been installed via Packer
 ##############################################
 
-sudo mv /tmp/elasticsearch_vars /etc/elasticsearch/configurable/elasticsearch_vars
-sudo cp /etc/elasticsearch/configurable/elasticsearch /etc/init.d/
-sudo chmod u+x /etc/init.d/elasticsearch
-sudo cp /etc/elasticsearch/configurable/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
-
 # heap size
-sudo sed -i "s/#ES_HEAP_SIZE=2g/ES_HEAP_SIZE=${heap_size}/" /etc/sysconfig/elasticsearch
+sudo sed -i 's/#MAX_LOCKED_MEMORY=unlimited/MAX_LOCKED_MEMORY=unlimited/' /etc/sysconfig/elasticsearch
+sudo sed -i "s/#ES_HEAP_SIZE=.*$/ES_HEAP_SIZE=${heap_size}/" /etc/sysconfig/elasticsearch
 
 sudo mkfs -t ext4 ${volume_name}
 sudo mkdir -p ${elasticsearch_data_dir}
