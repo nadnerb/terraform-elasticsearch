@@ -127,10 +127,10 @@ def green():
     sys.exit()
 
 def yellow():
-    sys.exit(1)
+    sys.exit()
 
 def red():
-    sys.exit(2)
+    sys.exit(1)
 
 codes = {
         "green": green,
