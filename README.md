@@ -27,6 +27,12 @@ We use prebuild Packer AMI's built from these projects:
 We rely on AWS credentials to have been set elsewhere, for example using environment variables. We also use [terraform_exec](https://github.com/nadnerb/terraform_exec) to execute terraform that
 saves environment state to S3.
 
+### KMS encrypted consul atlas token
+
+aws kms encrypt --key-id <kms-key-id> --plaintext fileb://<(echo <atlas-token>) --output text --query CiphertextBlob | base64 | base64 -d
+
+This is then provided to terraform via `encrypted_atlas_token`.
+
 ### Terraform configuration
 
 Create a configuration file such as `~/.aws/default.tfvars` which can include mandatory and optional variables such as:

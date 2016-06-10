@@ -66,6 +66,7 @@ script
 
   # Get the IP
   BIND=`ifconfig eth0 | grep "inet addr" | awk '{ print substr($2,6) }'`
+  ATLAS_TOKEN=`sudo -H -u ec2-user bash -c 'aws kms decrypt --ciphertext-blob fileb://<(echo '${encrypted_atlas_token}' | base64 -d) --output text --query Plaintext --region ${aws_region} | base64 -d'`
 
   echo $$ > $${PIDFILE}
   exec /usr/local/bin/consul agent \
@@ -75,7 +76,7 @@ script
     -dc="${consul_dc}" \
     -atlas=${atlas} \
     -atlas-join \
-    -atlas-token="${atlas_token}" \
+    -atlas-token="$${ATLAS_TOKEN}" \
     >>/var/log/consul.log 2>&1
 end script
 
@@ -90,11 +91,11 @@ sudo mv /tmp/upstart /etc/init/consul.conf
 # Setup the consul agent config
 cat <<'EOF' >/tmp/elasticsearch-consul.json
 {
-    "service": {
+    "services": [{
         "name": "elasticsearch",
         "leave_on_terminate": true,
         "tags": [
-            "http", "index"
+            "http", "query"
         ],
         "port": 9200,
         "checks": [{
@@ -103,6 +104,21 @@ cat <<'EOF' >/tmp/elasticsearch-consul.json
             "notes": "Use curl to check the web service every 10 seconds",
             "script": "curl `ifconfig eth0 | grep 'inet addr' | awk '{ print substr($2,6) }'`:9200 >/dev/null 2>&1",
             "interval": "10s"
+        } ]
+    },
+    {
+        "name": "elasticsearch-9300",
+        "leave_on_terminate": true,
+        "tags": [
+            "tcp", "index"
+        ],
+        "port": 9300,
+        "checks": [{
+            "id": "1",
+            "name": "Elasticsearch TCP",
+            "notes": "Use nc to check the tcp port every 10 seconds",
+            "script": "nc -zv `ifconfig eth0 | grep 'inet addr' | awk '{ print substr($2,6) }'` 9300 >/dev/null 2>&1 ",
+            "interval": "10s"
         }, {
             "id": "2",
             "name": "Cluster health",
@@ -110,7 +126,7 @@ cat <<'EOF' >/tmp/elasticsearch-consul.json
             "script": "python /etc/consul.d/check.py",
             "interval": "30s"
         }]
-    }
+    }]
 }
 EOF
 sudo mv /tmp/elasticsearch-consul.json /etc/consul.d/elasticsearch.json

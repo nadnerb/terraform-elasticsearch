@@ -53,15 +53,15 @@ resource "template_file" "user_data" {
     dns_server              = "${var.dns_server}"
     consul_dc               = "${var.consul_dc}"
     atlas                   = "${var.atlas}"
-    atlas_token             = "${var.atlas_token}"
+    encrypted_atlas_token   = "${var.encrypted_atlas_token}"
     volume_name             = "${var.volume_name}"
     elasticsearch_data_dir  = "${var.elasticsearch_data}"
     heap_size               = "${var.heap_size}"
-    es_cluster  = "${var.es_cluster}"
-    es_environment  = "${var.es_environment}"
-    security_groups = "${aws_security_group.elasticsearch.id}"
-    aws_region  = "${var.aws_region}"
-    availability_zones = "${var.availability_zones}"
+    es_cluster              = "${var.es_cluster}"
+    es_environment          = "${var.es_environment}"
+    security_groups         = "${aws_security_group.elasticsearch.id}"
+    aws_region              = "${var.aws_region}"
+    availability_zones      = "${var.availability_zones}"
   }
 
   lifecycle {

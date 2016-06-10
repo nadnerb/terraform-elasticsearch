@@ -158,6 +158,7 @@ variable "heap_size" {
 # Consul configuration below
 ###################################################################
 
+### MANDATORY ###
 variable "dns_server" {
 }
 
@@ -169,5 +170,6 @@ variable "atlas" {
   default = "example/atlas"
 }
 
-variable "atlas_token" {
+### MANDATORY ###
+variable "encrypted_atlas_token" {
 }
