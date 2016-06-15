@@ -6,7 +6,7 @@ This project will create an elasticsearch cluster in AWS using multiple availabi
 ## Requirements
 
 * Terraform >= v0.6.15
-* Elasticsearch IAM profile called elasticSearchNode with [EC2 permissions](https://github.com/elastic/elasticsearch-cloud-aws#recommended-ec2-permissions)
+* Elasticsearch IAM profile called elasticSearchNode with [EC2 permissions](https://github.com/elastic/elasticsearch-cloud-aws#recommended-ec2-permissions). You can also use the iam project found in the iam directory. This only needs to be done once per account.
 
 Packer AMI's
 
@@ -98,5 +98,4 @@ terraform plan -var-file '~/.aws/default.tfvars' -var 'additional_security_group
 ## TODO
 
 * Update this readme
-* Create IAM role
 

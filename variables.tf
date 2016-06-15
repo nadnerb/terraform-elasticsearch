@@ -28,6 +28,7 @@ variable "es_environment" {
 }
 
 variable "es_cluster" {
+  description = "Name of the elasticsearch cluster, used in node discovery"
   default = "elasticsearch"
 }
 
@@ -86,7 +87,7 @@ variable "subnets" {
 ###################################################################
 
 ### MANDATORY ###
-# Amazon Linux built by packer
+# Amazon Linux elasticsearch ami built by packer
 # See https://github.com/nadnerb/packer-elastic-search
 variable "ami" {
 }
@@ -94,12 +95,6 @@ variable "ami" {
 variable "instance_type" {
   description = "Elasticsearch instance type."
   default = "t2.medium"
-}
-
-### MANDATORY ###
-# if you have multiple clusters sharing the same es_environment..?
-variable "es_cluster" {
-  description = "Elastic cluster name"
 }
 
 ### MANDATORY ###
