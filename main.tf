@@ -76,9 +76,7 @@ resource "aws_launch_configuration" "elasticsearch" {
   associate_public_ip_address = false
   ebs_optimized = false
   key_name = "${var.key_name}"
-# FIXME or not? makes it a pain with multiple clusters in an account, seperate iam main.tf instead?
-  #iam_instance_profile = "${aws_iam_instance_profile.elasticsearch.id}"
-  iam_instance_profile = "elasticSearchNode"
+  iam_instance_profile = "${var.iam_profile}"
   user_data = "${template_file.user_data.rendered}"
 
   lifecycle {
