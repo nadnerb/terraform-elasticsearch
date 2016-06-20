@@ -134,19 +134,18 @@ sudo mv /tmp/elasticsearch-consul.json /etc/consul.d/elasticsearch.json
 cat <<EOF >/tmp/check.py
 import requests
 import sys
-import socket
-ip = socket.gethostbyname(socket.gethostname())
 
+ip = requests.get("http://169.254.169.254/latest/meta-data/local-ipv4").text
 url = "http://{ip}:9200/_cat/health".format(**locals())
 
 def green():
     sys.exit()
 
 def yellow():
-    sys.exit()
+    sys.exit(1)
 
 def red():
-    sys.exit(1)
+    sys.exit(2)
 
 codes = {
         "green": green,
