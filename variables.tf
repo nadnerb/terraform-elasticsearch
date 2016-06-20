@@ -19,14 +19,6 @@ variable "stream_tag" {
   default = "default"
 }
 
-variable "environment" {
-  default = "default"
-}
-
-variable "es_environment" {
-  default = "elasticsearch"
-}
-
 variable "es_cluster" {
   description = "Name of the elasticsearch cluster, used in node discovery"
   default = "elasticsearch"
@@ -48,11 +40,6 @@ variable "iam_profile" {
 variable "aws_region" {
   description = "AWS region to launch servers."
   default = "ap-southeast-2"
-}
-
-variable "availability_zones" {
-  description = "AWS region to launch servers."
-  default = "ap-southeast-2a,ap-southeast-2b"
 }
 
 variable "security_group_name" {
@@ -82,6 +69,11 @@ variable "subnets" {
   description = "subnets to deploy into"
 }
 
+variable "subnet_a" {
+  description = "subnets for deployment"
+  default = ""
+}
+
 ###################################################################
 # Elasticsearch configuration below
 ###################################################################
@@ -102,6 +94,9 @@ variable "es_environment" {
   description = "Elastic environment tag for auto discovery"
 }
 
+variable "es_discovery_availability_zones" {
+
+}
 # total number of nodes
 variable "instances" {
   description = "total instances"
