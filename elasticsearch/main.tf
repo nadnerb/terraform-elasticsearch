@@ -20,8 +20,10 @@ variable "es_discovery_security_group" {}
 variable "es_discovery_availability_zones" {}
 
 variable "elasticsearch_data_dir" {}
+variable "volume_az" {}
 variable "volume_name" {}
 variable "volume_size" {}
+variable "volume_encryption" {}
 variable "heap_size" {}
 
 variable "dns_server" {}
@@ -66,8 +68,7 @@ resource "aws_instance" "elastic" {
   vpc_security_group_ids = ["${split(",", replace(var.security_groups, "/,\\s?$/", ""))}"]
   key_name = "${var.key_name}"
 
-  # number of elasticsearch nodes
-  count = "${var.num_nodes}"
+  count = 1
 
   tags {
     Name = "${var.name}"
@@ -81,13 +82,20 @@ resource "aws_instance" "elastic" {
     Environment = "${var.environment_tag}"
   }
 
-  ebs_block_device {
-    device_name = "${var.volume_name}"
-    volume_size = "${var.volume_size}"
-  }
-
   lifecycle {
     create_before_destroy = true
   }
 
+}
+
+resource "aws_ebs_volume" "elastic" {
+  availability_zone = "${var.volume_az}"
+  size = "${var.volume_size}"
+  encrypted = "${var.volume_encryption}"
+}
+
+resource "aws_volume_attachment" "elastic" {
+  device_name = "${var.volume_name}"
+  volume_id = "${aws_ebs_volume.elastic.id}"
+  instance_id = "${aws_instance.elastic.id}"
 }

@@ -29,7 +29,12 @@ EOF
 sudo sed -i 's/#MAX_LOCKED_MEMORY=unlimited/MAX_LOCKED_MEMORY=unlimited/' /etc/sysconfig/elasticsearch
 sudo sed -i "s/#ES_HEAP_SIZE=.*$/ES_HEAP_SIZE=${heap_size}/" /etc/sysconfig/elasticsearch
 
-sudo mkfs -t ext4 ${volume_name}
+# create fs if needed
+if file -s ${volume_name} | grep "${volume_name}: data"; then
+    echo "creating fs"
+    sudo mkfs -t ext4 ${volume_name}
+fi
+
 sudo mkdir -p ${elasticsearch_data_dir}
 sudo mount ${volume_name} ${elasticsearch_data_dir}
 sudo echo "${volume_name} ${elasticsearch_data_dir} ext4 defaults,nofail 0 2" >> /etc/fstab

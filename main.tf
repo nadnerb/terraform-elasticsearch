@@ -72,8 +72,10 @@ module "elastic_nodes_a" {
   es_discovery_availability_zones ="${var.es_discovery_availability_zones}"
 
   elasticsearch_data_dir  = "${var.elasticsearch_data}"
+  volume_az = "${var.volume_az}"
   volume_name = "${var.volume_name}"
   volume_size = "${var.volume_size}"
+  volume_encryption = "${var.volume_encryption}"
   heap_size = "${var.heap_size}"
 
   dns_server = "${var.dns_server}"

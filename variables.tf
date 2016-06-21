@@ -144,6 +144,10 @@ variable "heap_size" {
   default = "256m"
 }
 
+variable "volume_az" {
+  default = "ap-southeast-2a"
+}
+
 ###################################################################
 # Consul configuration below
 ###################################################################
