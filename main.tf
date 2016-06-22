@@ -58,12 +58,14 @@ module "elastic_nodes_a" {
 
   iam_profile = "${var.iam_profile}"
   aws_region = "${var.aws_region}"
-  ami = "${var.ami}"
+
+  ami = "${var.ami_a}"
   subnet = "${var.subnet_a}"
+  num_nodes = "${var.subnet_a_num_nodes}"
+
   instance_type = "${var.instance_type}"
   security_groups = "${concat(aws_security_group.elasticsearch.id, ",", var.additional_security_groups)}"
   key_name = "${var.key_name}"
-  num_nodes = "${var.subnet_a_num_nodes}"
 
   # cluster discovery
   es_environment = "${var.es_environment}"
@@ -72,7 +74,47 @@ module "elastic_nodes_a" {
   es_discovery_availability_zones ="${var.availability_zones}"
 
   elasticsearch_data_dir  = "${var.elasticsearch_data}"
-  volume_az = "${var.volume_az}"
+  volume_az = "${var.volume_az_a}"
+  volume_name = "${var.volume_name}"
+  volume_size = "${var.volume_size}"
+  volume_encryption = "${var.volume_encryption}"
+  heap_size = "${var.heap_size}"
+
+  dns_server = "${var.dns_server}"
+  consul_dc = "${var.consul_dc}"
+  atlas = "${var.atlas}"
+  encrypted_atlas_token = "${var.encrypted_atlas_token}"
+}
+
+module "elastic_nodes_b" {
+  source = "./elasticsearch"
+
+  # tags
+  stream_tag = "${var.stream_tag}"
+  role_tag = "elasticsearch"
+  costcenter_tag = "${var.costcenter_tag}"
+  environment_tag = "${var.environment_tag}"
+  name = "${var.es_environment}-elasticsearch-b"
+
+  iam_profile = "${var.iam_profile}"
+  aws_region = "${var.aws_region}"
+
+  ami = "${var.ami_b}"
+  subnet = "${var.subnet_b}"
+  num_nodes = "${var.subnet_b_num_nodes}"
+
+  instance_type = "${var.instance_type}"
+  security_groups = "${concat(aws_security_group.elasticsearch.id, ",", var.additional_security_groups)}"
+  key_name = "${var.key_name}"
+
+  # cluster discovery
+  es_environment = "${var.es_environment}"
+  es_cluster = "${var.es_cluster}"
+  es_discovery_security_group = "${aws_security_group.elasticsearch.id}"
+  es_discovery_availability_zones ="${var.availability_zones}"
+
+  elasticsearch_data_dir  = "${var.elasticsearch_data}"
+  volume_az = "${var.volume_az_b}"
   volume_name = "${var.volume_name}"
   volume_size = "${var.volume_size}"
   volume_encryption = "${var.volume_encryption}"

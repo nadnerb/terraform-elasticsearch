@@ -69,9 +69,13 @@ variable "subnets" {
   description = "subnets to deploy into"
 }
 
+# NEW WAY #
 variable "subnet_a" {
   description = "subnets for deployment"
-  default = ""
+}
+
+variable "subnet_b" {
+  description = "subnets for deployment"
 }
 
 ###################################################################
@@ -103,6 +107,12 @@ variable "instances" {
   default = "2"
 }
 
+variable "ami_a" {
+}
+
+variable "ami_b" {
+}
+
 #DEPRECATED
 # number of nodes in zone a
 variable "subnet_a_num_nodes" {
@@ -115,6 +125,12 @@ variable "subnet_a_num_nodes" {
 variable "subnet_b_num_nodes" {
   description = "Elastic nodes in b"
   default = "1"
+}
+
+variable "volume_az_a" {
+}
+
+variable "volume_az_b" {
 }
 
 # the ability to add additional existing security groups. In our case
