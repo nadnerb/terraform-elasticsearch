@@ -94,7 +94,7 @@ variable "es_environment" {
   description = "Elastic environment tag for auto discovery"
 }
 
-variable "es_discovery_availability_zones" {
+variable "availability_zones" {
 
 }
 # total number of nodes

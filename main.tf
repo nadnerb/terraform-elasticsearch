@@ -69,7 +69,7 @@ module "elastic_nodes_a" {
   es_environment = "${var.es_environment}"
   es_cluster = "${var.es_cluster}"
   es_discovery_security_group = "${aws_security_group.elasticsearch.id}"
-  es_discovery_availability_zones ="${var.es_discovery_availability_zones}"
+  es_discovery_availability_zones ="${var.availability_zones}"
 
   elasticsearch_data_dir  = "${var.elasticsearch_data}"
   volume_az = "${var.volume_az}"
@@ -99,7 +99,7 @@ resource "template_file" "user_data" {
     es_environment          = "${var.es_environment}"
     security_groups         = "${aws_security_group.elasticsearch.id}"
     aws_region              = "${var.aws_region}"
-    availability_zones      = "${var.es_discovery_availability_zones}"
+    availability_zones      = "${var.availability_zones}"
   }
 
   lifecycle {
@@ -129,7 +129,7 @@ resource "aws_launch_configuration" "elasticsearch" {
 }
 
 resource "aws_autoscaling_group" "elasticsearch" {
-  availability_zones = ["${split(",", var.es_discovery_availability_zones)}"]
+  availability_zones = ["${split(",", var.availability_zones)}"]
   vpc_zone_identifier = ["${split(",", var.subnets)}"]
   max_size = "${var.instances}"
   min_size = "${var.instances}"
