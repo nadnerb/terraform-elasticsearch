@@ -30,7 +30,7 @@ sudo sed -i 's/#MAX_LOCKED_MEMORY=unlimited/MAX_LOCKED_MEMORY=unlimited/' /etc/s
 sudo sed -i "s/#ES_HEAP_SIZE=.*$/ES_HEAP_SIZE=${heap_size}/" /etc/sysconfig/elasticsearch
 
 # create fs if needed
-if file -s ${volume_name} | grep "${volume_name}: data"; then
+if sudo file -sL ${volume_name} | grep "${volume_name}: data"; then
     echo "creating fs"
     sudo mkfs -t ext4 ${volume_name}
 fi
