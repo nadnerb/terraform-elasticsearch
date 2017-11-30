@@ -12,7 +12,7 @@ Packer AMI's
 
 We use prebuild Packer AMI's built from these projects:
 
-* [packer-elasticsearch](https://github.com/nadnerb/packer-elastic-search)
+* [packer-elasticsearch](https://github.com/nadnerb/packer-elasticsearch)
 
 ## Installation
 
